@@ -144,7 +144,10 @@ var pyte = {
   }
 }
 
-var canvas = document.getElementById("myCanvas");
+var canvas = document.getElementById("canvas_plane");
+_screen_width = (screen.height<=screen.width?screen.height:screen.width)*0.75
+$(canvas).attr('width', _screen_width)
+$(canvas).attr('height', _screen_width)
 cartesian.make(canvas)
 
 $('#form').on('submit', function(){
@@ -187,8 +190,10 @@ $('#form').on('submit', function(){
 
   $('.a_side').html(triangle_obj.a_side)
   $('.o_side').html(triangle_obj.o_side)
-  $('.hypotenuse').html(triangle_obj.hypotenuse)
+  _hypotenuse = (triangle_obj.hypotenuse % 1 != 0)?'sqrt('+Math.pow(triangle_obj.hypotenuse,2)+') = '+triangle_obj.hypotenuse:triangle_obj.hypotenuse
+  $('.hypotenuse').html(_hypotenuse)
   $('.info').addClass('show')
+
   if (plus_minus != null) {
     triangle_obj = pyte.create(a_side, o_side, hypotenuse)
     

@@ -9,22 +9,37 @@
     <script src="bower_components/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
+  <div class="text-center">
+    <p>View source on <a href="https://github.com/fershopls/cartesian">github</a>.</p>
+  </div>
     
-    <div class="text-center">
-      <form id="form">
-        <select id=fun>
+  <div class="container text-center">
+  <form id="form" novalidate>
+    <div class="row">
+      <div class="three columns">
+        <select id=fun class="u-full-width">
           <option value="point">Point</option>
           <option value="sen">Sen</option>
           <option value="cos">Cos</option>
           <option value="tan">Tan</option>
         </select>
-        <input id=num type="number" style="width:80px">
-        /
-        <input id=den type="number" style="width:80px">
-        <br>
-        <input type="submit" value="draw">
-      </form>
+      </div>
+      <div class="five columns">
+        <input id=num type="number" class="u-full-width">
+      </div>
+      <div class="one column">
+        <input type="text" value="/" disabled class="u-full-width" style="text-align:center"/>
+      </div>
+      <div class="three columns">
+        <input id=den type="number" class="u-full-width">
+      </div>
+      <div class="twelve columns">
+        <input type="submit" value="draw" class="u-full-width">
+      </div>
     </div>
+  <br>
+  </form>
+  </div>
 
     <div class="info text-center">
       <pre>
@@ -35,7 +50,7 @@
     </div>
 
     <div class="text-center">
-      <canvas id="myCanvas" width="600" height="600">
+      <canvas id="canvas_plane" width="350" height="350">
     </div>
     
     <script src="main.js"></script>
