@@ -144,8 +144,8 @@ var pyte = {
   }
 }
 
-var canvas = document.getElementById("canvas_plane");
-_screen_width = (screen.height<=screen.width?screen.height:screen.width)*0.75
+var canvas = document.getElementById("canvas_plane")
+_screen_width = ($(window).height()<=$(window).width()?$(window).height():$(window).width())*0.95
 $(canvas).attr('width', _screen_width)
 $(canvas).attr('height', _screen_width)
 cartesian.make(canvas)
