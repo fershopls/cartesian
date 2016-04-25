@@ -1,15 +1,20 @@
 var cartesian = {
   last_coords: [0,0],
 
+  clear: function (canvas) {
+    // Get context
+    ctx = canvas.getContext("2d")
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  },
+
   /* Create the gird and scope for cartesian system */
   make: function (canvas, options) {
     // Default options
     default_options = {total_lines:20}
     options = $.extend(default_options, options)
-
     // Get context
     ctx = canvas.getContext("2d")
-    
     // Draw grid
     ctx.beginPath()
     ctx.strokeStyle = '#f1f1f1'
@@ -21,7 +26,6 @@ var cartesian = {
     }
     ctx.stroke()
     ctx.closePath()
-
     // Draw scope
     ctx.beginPath()
     ctx.strokeStyle = '#b4b4b4'
@@ -85,12 +89,11 @@ var cartesian = {
     ctx.closePath()
   },
 
+  /* Prints a string on given coords*/
   text: function (canvas, string, x, y) {
     cartesian_cords = this.coords(canvas, x, y)
-
     // Get context
     ctx = canvas.getContext("2d")
-    
     // Write text
     ctx.beginPath()
     ctx.font = "14px sans-serif"
@@ -99,52 +102,49 @@ var cartesian = {
   }
 }
 
+var pyte = {
+  make: function (canvas, triangle_obj) {
+    x = triangle_obj.a_side
+    y = triangle_obj.o_side
+    // Get max size and extra padding
+    max = Math.abs(x)>=Math.abs(y)?x:y
+    max = Math.abs(max)*1.20
+    // Scale triangle
+    if (x > 85 || y > 85)
+    {
+      _x = x/max*100
+      _y = y/max*100
+    } else {
+      _x = x
+      _y = y
+    }
+    // Draw triangle
+    cartesian.to(canvas, 'x', _x, _y)
+    cartesian.to(canvas, 'y')
+    cartesian.to(canvas, 'c')
+    cartesian.point(canvas)
+    cartesian.text(canvas, '('+x+'/'+y+')')
+    
+    return triangle_obj
+  },
 
-function getTriangleSizes (coords){
-  if (coords.x && coords.y)
-    coords.h = Math.sqrt(Math.pow(coords.x,2)+Math.pow(coords.y,2))
-  else if (coords.h && coords.x)
-    coords.y = Math.sqrt(Math.pow(coords.h,2)-Math.pow(coords.x,2))
-  else if (coords.h && coords.y)
-    coords.x = Math.sqrt(Math.pow(coords.h,2)-Math.pow(coords.y,2))
-  return coords
-}
+  _getSides: function (triangle_obj) {
+    if (triangle_obj.a_side && triangle_obj.o_side)
+      triangle_obj.hypotenuse = Math.sqrt(Math.pow(triangle_obj.a_side,2)+Math.pow(triangle_obj.o_side,2))
+    else if (triangle_obj.hypotenuse && triangle_obj.a_side)
+      triangle_obj.o_side = Math.sqrt(Math.pow(triangle_obj.hypotenuse,2)-Math.pow(triangle_obj.a_side,2))
+    else if (triangle_obj.hypotenuse && triangle_obj.o_side)
+      triangle_obj.a_side = Math.sqrt(Math.pow(triangle_obj.hypotenuse,2)-Math.pow(triangle_obj.o_side,2))
+    return triangle_obj
+  },
 
-function triangle (coords) {
-  max = Math.abs(coords.x)>=Math.abs(coords.y)?coords.x:coords.y
-  max = Math.abs(max)*1.25
-  x = coords.x
-  y = coords.y
-  coords.x = x/max*100
-  coords.y = y/max*100
-  p = point(coords)
-  toc(p)
-  toy(p)
-  tox(p)
-  return {x:x,y:y,h:Math.sqrt(Math.pow(x,2)+Math.pow(y,2))}
+  create: function (a_side, o_side, hypotenuse) {
+    triangle_obj = {a_side: a_side, o_side:o_side, hypotenuse:hypotenuse}
+    return this._getSides(triangle_obj)
+  }
 }
-function dumpTriangleInfo(coords){
-  x = coords.x
-  y = coords.y
-  h = coords.h
-  coords.x = x/max*100
-  coords.y = y/max*100
-  
-  ctx.font = "13px serif";
-  
-  px = getCoords({x:coords.x,y:coords.y/2})
-  ctx.fillText(y, px.x, px.y);
-  px = getCoords({x:coords.x/2,y:coords.y/2})
-  ctx.fillText(h, px.x, px.y);
-  px = getCoords({x:coords.x/2,y:0})
-  ctx.fillText(x, px.x, px.y);
-}
-
 
 var canvas = document.getElementById("myCanvas");
 cartesian.make(canvas)
-cartesian.to(canvas, 'x', 40, -40)
-cartesian.to(canvas, 'y')
-cartesian.to(canvas, 'c')
-cartesian.point(canvas)
-cartesian.text(canvas, 'Cos(-5/13)')
+triangle = pyte.create(null,-35,37)
+pyte.make(canvas, triangle)
