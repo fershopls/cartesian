@@ -110,7 +110,7 @@ var pyte = {
     max = Math.abs(x)>=Math.abs(y)?x:y
     max = Math.abs(max)*1.20
     // Scale triangle
-    if (x > 85 || y > 85)
+    if (x > 85 || y > 85 || x < 20 || y < 20)
     {
       _x = x/max*100
       _y = y/max*100
@@ -135,7 +135,7 @@ var pyte = {
       triangle_obj.o_side = Math.sqrt(Math.pow(triangle_obj.hypotenuse,2)-Math.pow(triangle_obj.a_side,2))
     else if (triangle_obj.hypotenuse && triangle_obj.o_side)
       triangle_obj.a_side = Math.sqrt(Math.pow(triangle_obj.hypotenuse,2)-Math.pow(triangle_obj.o_side,2))
-    return triangle_obj
+    return {a_side:triangle_obj.a_side, o_side:triangle_obj.o_side, hypotenuse:triangle_obj.hypotenuse}
   },
 
   create: function (a_side, o_side, hypotenuse) {
@@ -146,5 +146,47 @@ var pyte = {
 
 var canvas = document.getElementById("myCanvas");
 cartesian.make(canvas)
-triangle = pyte.create(null,-35,37)
-pyte.make(canvas, triangle)
+
+$('#submit').on('click', function(){
+  post = {
+    fun: $('#fun').val(),
+    num: $('#num').val(),
+    den: $('#den').val(),
+  }
+
+  a_side = null
+  o_side = null
+  hypotenuse = null
+  plus_minus = null
+
+  if (post.fun == 'sen') {
+    // OH ! A
+    o_side = post.num
+    hypotenuse = post.den
+    plus_minus = 'a'
+  } else if (post.fun == 'cos') {
+    // AH ! O
+    a_side = post.num
+    hypotenuse = post.den
+    plus_minus = 'o'
+  } else if (post.fun == 'tan' || post.fun == 'point') {
+    // OA ! H
+    o_side = post.num
+    a_side = post.den
+  }
+
+  cartesian.clear(canvas)
+  cartesian.make(canvas)
+  
+  triangle_obj = pyte.create(a_side, o_side, hypotenuse)
+  pyte.make(canvas, triangle_obj)
+
+  if (plus_minus != null) {
+    triangle_obj = pyte.create(a_side, o_side, hypotenuse)
+    
+    triangle_obj.a_side = plus_minus=='a'?triangle_obj.a_side*-1:triangle_obj.a_side
+    triangle_obj.o_side = plus_minus=='o'?triangle_obj.o_side*-1:triangle_obj.o_side
+    
+    pyte.make(canvas, triangle_obj)
+  }
+});
