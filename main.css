@@ -1,0 +1,11 @@
+.text-center {
+  text-align: center;
+  padding: 30px 0 10px;
+}
+.text-center canvas {
+  border: 1px solid #e7e7e7;
+}
+.status {
+  background-color: #fafafa;
+  padding: 20px;
+}
