@@ -159,7 +159,11 @@ $('#form').on('submit', function(){
   hypotenuse = null
   plus_minus = null
 
-  if (post.fun == 'sen') {
+  if (post.fun == 'point') {
+    // AO ! H
+    a_side = post.num
+    o_side = post.den
+  } else if (post.fun == 'sen') {
     // OH ! A
     o_side = post.num
     hypotenuse = post.den
@@ -169,7 +173,7 @@ $('#form').on('submit', function(){
     a_side = post.num
     hypotenuse = post.den
     plus_minus = 'o'
-  } else if (post.fun == 'tan' || post.fun == 'point') {
+  } else if (post.fun == 'tan') {
     // OA ! H
     o_side = post.num
     a_side = post.den
