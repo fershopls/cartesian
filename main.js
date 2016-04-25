@@ -110,7 +110,7 @@ var pyte = {
     max = Math.abs(x)>=Math.abs(y)?x:y
     max = Math.abs(max)*1.20
     // Scale triangle
-    if (x > 85 || y > 85 || x < 20 || y < 20)
+    if (Math.abs(x) > 85 || Math.abs(y) > 85 || Math.abs(x) < 20 || Math.abs(y) < 20)
     {
       _x = x/max*100
       _y = y/max*100
