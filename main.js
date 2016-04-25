@@ -1,92 +1,105 @@
-function makeCartesian(canvas, options) {
-  // Default options
-  default_options = {total_lines:20}
-  options = $.extend(default_options, options)
+var cartesian = {
+  last_coords: [0,0],
 
-  // Get context
-  ctx = canvas.getContext("2d");
+  /* Create the gird and scope for cartesian system */
+  make: function (canvas, options) {
+    // Default options
+    default_options = {total_lines:20}
+    options = $.extend(default_options, options)
 
-  ctx.beginPath();
-  ctx.strokeStyle = '#f1f1f1'
-  for (i = options.total_lines; i > 0; i--) {
-    ctx.moveTo(i*400/options.total_lines, 0)
-    ctx.lineTo(i*400/options.total_lines, 400)
+    // Get context
+    ctx = canvas.getContext("2d")
+    
+    // Draw grid
+    ctx.beginPath()
+    ctx.strokeStyle = '#f1f1f1'
+    for (i = options.total_lines; i > 0; i--) {
+      ctx.moveTo(i*canvas.width/options.total_lines, 0)
+      ctx.lineTo(i*canvas.width/options.total_lines, canvas.width)
+      ctx.moveTo(0, i*canvas.width/options.total_lines)
+      ctx.lineTo(canvas.width, i*canvas.width/options.total_lines)
+    }
     ctx.stroke()
-    ctx.moveTo(0, i*400/options.total_lines)
-    ctx.lineTo(400, i*400/options.total_lines)
+    ctx.closePath()
+
+    // Draw scope
+    ctx.beginPath()
+    ctx.strokeStyle = '#b4b4b4'
+    ctx.moveTo(canvas.width/2,0)
+    ctx.lineTo(canvas.width/2,canvas.width)
+    ctx.moveTo(0,canvas.width/2)
+    ctx.lineTo(canvas.width,canvas.width/2)
     ctx.stroke()
+    ctx.closePath()
+  },
+
+  /* Coords function receives coordinates in a range of 100% and transforms into px by canvas width*/
+  coords: function (canvas, x, y) {
+    x = x==undefined?this.last_coords[0]:x
+    y = y==undefined?this.last_coords[1]:y
+    // Write last coords
+    this.last_coords = [x,y]
+    // Get coords as percent
+    x = x/100*canvas.width/2
+    y = y/100*canvas.width/2
+    // Fix canvas coords to cartesian coords
+    x = canvas.width/2+x
+    y = canvas.width/2-y
+    return {x:x,y:y}
+  },
+
+  /* Creates a point on the coords given */
+  point: function (canvas, x, y) {
+    cartesian_cords = this.coords(canvas, x, y)
+
+    // Get context
+    ctx = canvas.getContext("2d")
+    
+    ctx.beginPath()
+    ctx.arc(cartesian_cords.x, cartesian_cords.y, 4, 0, Math.PI*2, true)
+    ctx.fillStyle = "rgb(200,50,50)"
+    ctx.fill()
+    ctx.closePath()
+    
+    return {x:x, y:y}
+  },
+
+  /* Traces a line from the point to the scope in any direction given [x,y,c] */
+  to: function (canvas, direction, x, y) {
+    cartesian_cords = this.coords(canvas, x, y)
+
+    // Get context
+    ctx = canvas.getContext("2d")
+    
+    ctx.beginPath()
+    ctx.setLineDash([8,5])
+    ctx.strokeStyle = 'lightcoral'
+    ctx.moveTo(cartesian_cords.x, cartesian_cords.y)
+    if (direction == "x")
+      ctx.lineTo(cartesian_cords.x, canvas.width/2)
+    else if (direction == "y")
+      ctx.lineTo(canvas.width/2, cartesian_cords.y)
+    else
+      ctx.lineTo(canvas.width/2, canvas.width/2)
+    ctx.stroke()
+    ctx.closePath()
+  },
+
+  text: function (canvas, string, x, y) {
+    cartesian_cords = this.coords(canvas, x, y)
+
+    // Get context
+    ctx = canvas.getContext("2d")
+    
+    // Write text
+    ctx.beginPath()
+    ctx.font = "14px sans-serif"
+    ctx.fillText(string, cartesian_cords.x, cartesian_cords.y)
+    ctx.closePath()
   }
-  ctx.closePath();
-
-  ctx.beginPath();
-  ctx.strokeStyle = '#b4b4b4'
-  ctx.moveTo(200,0);
-  ctx.lineTo(200,400);
-  ctx.moveTo(0,200);
-  ctx.lineTo(400,200);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.arc(200, 200, 2, 0, Math.PI*2, true); 
-  ctx.fillStyle = "red";
-  ctx.fill();
-  ctx.closePath();
 }
 
-function dd(obj) {
-  $(".status").html(JSON.stringify(obj,null,2))
-}
 
-function getCoords (coords) {
-  return {'x': 200+coords.x*2, 'y': 200-coords.y*2};
-}
-
-function point (coords) {
-  px = getCoords(coords)
-  ctx.beginPath();
-  ctx.arc(px.x, px.y, 4, 0, Math.PI*2, true); 
-  ctx.fillStyle = "red";
-  ctx.fill();
-  ctx.font = "18px serif";
-  ctx.fillText("  "+coords.name, px.x, px.y);
-  ctx.closePath();
-  return coords
-}
-
-function tox (coords) {
-  px = getCoords(coords)
-  ctx.beginPath();
-  ctx.setLineDash([8,5])
-  ctx.strokeStyle = 'lightcoral'
-  ctx.moveTo(px.x, px.y);
-  ctx.lineTo(px.x, 200);
-  ctx.stroke();
-  ctx.closePath();
-  
-  return {x:0, y:coords.y}
-}
-function toy (coords) {
-  px = getCoords(coords)
-  ctx.beginPath();
-  ctx.setLineDash([8,5])
-  ctx.strokeStyle = 'lightcoral'
-  ctx.moveTo(px.x, px.y);
-  ctx.lineTo(200, px.y);
-  ctx.stroke();
-  return {x:0, y:coords.y}
-}
-function toc (coords) {
-  px = getCoords(coords)
-  ctx.beginPath();
-  ctx.setLineDash([8,5])
-  ctx.strokeStyle = 'lightcoral'
-  ctx.moveTo(px.x, px.y);
-  ctx.lineTo(200, 200);
-  ctx.stroke();
-  ctx.closePath();
-  
-  return {x:0, y:coords.y}
-}
 function getTriangleSizes (coords){
   if (coords.x && coords.y)
     coords.h = Math.sqrt(Math.pow(coords.x,2)+Math.pow(coords.y,2))
@@ -128,13 +141,10 @@ function dumpTriangleInfo(coords){
 }
 
 
-
-// canvas.width canvas.height
 var canvas = document.getElementById("myCanvas");
-
-makeCartesian(canvas)
-
-// t = getTriangleSizes({x:-5, h:13})
-// t.name = 'Cos(-5/13)'
-// t = triangle (t)
-// dumpTriangleInfo(t)
+cartesian.make(canvas)
+cartesian.to(canvas, 'x', 40, -40)
+cartesian.to(canvas, 'y')
+cartesian.to(canvas, 'c')
+cartesian.point(canvas)
+cartesian.text(canvas, 'Cos(-5/13)')
