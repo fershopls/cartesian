@@ -1,14 +1,19 @@
-function makeCartesian(ctx) {
-  max = 20
+function makeCartesian(canvas, options) {
+  // Default options
+  default_options = {total_lines:20}
+  options = $.extend(default_options, options)
+
+  // Get context
+  ctx = canvas.getContext("2d");
+
   ctx.beginPath();
   ctx.strokeStyle = '#f1f1f1'
-  ctx.lineWidth = 1
-  for (i = max; i > 0; i--) {
-    ctx.moveTo(i*400/max, 0)
-    ctx.lineTo(i*400/max, 400)
+  for (i = options.total_lines; i > 0; i--) {
+    ctx.moveTo(i*400/options.total_lines, 0)
+    ctx.lineTo(i*400/options.total_lines, 400)
     ctx.stroke()
-    ctx.moveTo(0, i*400/max)
-    ctx.lineTo(400, i*400/max)
+    ctx.moveTo(0, i*400/options.total_lines)
+    ctx.lineTo(400, i*400/options.total_lines)
     ctx.stroke()
   }
   ctx.closePath();
@@ -126,16 +131,10 @@ function dumpTriangleInfo(coords){
 
 // canvas.width canvas.height
 var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
 
-makeCartesian(ctx)
+makeCartesian(canvas)
 
-t = getTriangleSizes({x:-5, h:13})
-t.name = 'Cos(-5/13)'
-t = triangle (t)
-dumpTriangleInfo(t)
-
-t = getTriangleSizes({y:-35, h:37})
-t.name = 'Sen(-5/13)'
-t = triangle (t)
-dumpTriangleInfo(t)
+// t = getTriangleSizes({x:-5, h:13})
+// t.name = 'Cos(-5/13)'
+// t = triangle (t)
+// dumpTriangleInfo(t)
