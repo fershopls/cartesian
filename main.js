@@ -147,7 +147,7 @@ var pyte = {
 var canvas = document.getElementById("myCanvas");
 cartesian.make(canvas)
 
-$('#submit').on('click', function(){
+$('#form').on('submit', function(){
   post = {
     fun: $('#fun').val(),
     num: $('#num').val(),
@@ -181,6 +181,10 @@ $('#submit').on('click', function(){
   triangle_obj = pyte.create(a_side, o_side, hypotenuse)
   pyte.make(canvas, triangle_obj)
 
+  $('.a_side').html(triangle_obj.a_side)
+  $('.o_side').html(triangle_obj.o_side)
+  $('.hypotenuse').html(triangle_obj.hypotenuse)
+  $('.info').addClass('show')
   if (plus_minus != null) {
     triangle_obj = pyte.create(a_side, o_side, hypotenuse)
     
@@ -189,4 +193,6 @@ $('#submit').on('click', function(){
     
     pyte.make(canvas, triangle_obj)
   }
+  
+  return false;
 });
