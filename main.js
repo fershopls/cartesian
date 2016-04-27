@@ -143,10 +143,12 @@ var pyte = {
 }
 
 var dyge = {
-  colors: ["magenta","brown","blue","green","yellow","purple"],
+  colors: ["aqua","blue","green","springgreen","yellow","orange","brown","magenta","purple"],
+  color_index: 0,
   /* Draw an arc from degrees */
-  make: function (canvas, deg_start, deg_end, radius) {
-    color = this.colors[Math.floor(Math.random()*this.colors.length)]
+  make: function (canvas, deg_start, deg_end, radius, color) {
+    this.color_index = this.color_index < this.colors.length?this.color_index:0
+    color = color?color:this.colors[this.color_index++]
     
     ctx.beginPath();
     ctx.lineWidth = 5
@@ -169,9 +171,10 @@ var dyge = {
   },
   /* Get the reference angle from a given deg */
   ref_deg: function (deg) {
-    _d = Math.abs(deg)%360
-    _d = Math.abs(deg>270?360-_d:180-_d)
-    _d = Math.abs(deg<0&&deg>-90?deg:_d)
+    deg = deg%360
+    _d = Math.abs(deg)
+    _d = Math.abs(deg>270||deg<-270?360-_d:180-_d)
+    _d = Math.abs(deg<0&&deg>-90||deg>0&&deg<90?deg:_d)
     return _d
   }
 }
@@ -183,8 +186,10 @@ _screen_min_width = ($(window).height()<$(window).width()?$(window).height():$(w
 $(canvas).attr('width', _screen_min_width); $(canvas).attr('height', _screen_min_width)
 cartesian.make(canvas)
 
-// Draw
-dyge.make(canvas, 0, -90, 50)
+
+
+
+
 
 
 

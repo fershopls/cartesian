@@ -9,17 +9,17 @@
   background-color #fafafa
   padding 20px
 .info
-  height 0px
   transition all 0.4s ease
   background-color lightyellow
-  overflow hidden
+  overflow-x scroll
   margin 0
+  display none
+  &.show
+    display block
   pre
     padding 20px
     text-align left
     width 400px
     margin 0 auto
-  &.show
-    height 108px
 .canvas
   margin-bottom 10px
