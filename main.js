@@ -1,13 +1,13 @@
 var cartesian = {
+  // Last time used
   last_coords: [0,0],
-
+  /* Ereases all canvas content */
   clear: function (canvas) {
     // Get context
     ctx = canvas.getContext("2d")
-    // Clear canvas
+    // Reset canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   },
-
   /* Create the gird and scope for cartesian system */
   make: function (canvas, options) {
     // Default options
@@ -37,8 +37,7 @@ var cartesian = {
     ctx.stroke()
     ctx.closePath()
   },
-
-  /* Coords function receives coordinates in a range of 100% and transforms into px by canvas width*/
+  /* Coords function receives coordinates in a range of 100% and transforms into px based on canvas width*/
   coords: function (canvas, x, y) {
     x = x==undefined?this.last_coords[0]:x
     y = y==undefined?this.last_coords[1]:y
@@ -52,14 +51,12 @@ var cartesian = {
     y = canvas.width/2-y
     return {x:x,y:y}
   },
-
   /* Creates a point on the coords given */
   point: function (canvas, x, y) {
     cartesian_cords = this.coords(canvas, x, y)
-
     // Get context
     ctx = canvas.getContext("2d")
-    
+    // Draw
     ctx.beginPath()
     ctx.arc(cartesian_cords.x, cartesian_cords.y, 4, 0, Math.PI*2, true)
     ctx.fillStyle = "rgb(200,50,50)"
@@ -68,30 +65,29 @@ var cartesian = {
     
     return {x:x, y:y}
   },
-
   /* Traces a line from the point to the scope in any direction given [x,y,c] */
   to: function (canvas, direction, x, y) {
     cartesian_cords = this.coords(canvas, x, y)
-
     // Get context
     ctx = canvas.getContext("2d")
-    
+    // Config
     ctx.save()
     ctx.beginPath()
     ctx.setLineDash([8,5])
     ctx.strokeStyle = 'lightcoral'
     ctx.moveTo(cartesian_cords.x, cartesian_cords.y)
+    // Set direction
     if (direction == "x")
       ctx.lineTo(cartesian_cords.x, canvas.width/2)
     else if (direction == "y")
       ctx.lineTo(canvas.width/2, cartesian_cords.y)
     else
       ctx.lineTo(canvas.width/2, canvas.width/2)
+    // Draw
     ctx.stroke()
     ctx.closePath()
     ctx.restore()
   },
-
   /* Prints a string on given coords*/
   text: function (canvas, string, x, y) {
     cartesian_cords = this.coords(canvas, x, y)
@@ -113,8 +109,7 @@ var pyte = {
     max = Math.abs(x)>=Math.abs(y)?x:y
     max = Math.abs(max)*1.20
     // Scale triangle
-    if (Math.abs(x) > 85 || Math.abs(y) > 85 || Math.abs(x) < 20 || Math.abs(y) < 20)
-    {
+    if (Math.abs(x) > 85 || Math.abs(y) > 85 || Math.abs(x) < 20 || Math.abs(y) < 20) {
       _x = x/max*100
       _y = y/max*100
     } else {
@@ -130,7 +125,7 @@ var pyte = {
     
     return triangle_obj
   },
-
+  /* Calculate triangle side and hypotenuse by two facts */
   _getSides: function (triangle_obj) {
     if (triangle_obj.a_side && triangle_obj.o_side)
       triangle_obj.hypotenuse = Math.sqrt(Math.pow(triangle_obj.a_side,2)+Math.pow(triangle_obj.o_side,2))
@@ -140,7 +135,7 @@ var pyte = {
       triangle_obj.a_side = Math.sqrt(Math.pow(triangle_obj.hypotenuse,2)-Math.pow(triangle_obj.o_side,2))
     return {a_side:triangle_obj.a_side, o_side:triangle_obj.o_side, hypotenuse:triangle_obj.hypotenuse}
   },
-
+  /* Create triangle object */
   create: function (a_side, o_side, hypotenuse) {
     triangle_obj = {a_side: a_side, o_side:o_side, hypotenuse:hypotenuse}
     return this._getSides(triangle_obj)
@@ -163,18 +158,15 @@ var dyge = {
 
     return {deg_start:deg_start,deg_end:deg_end,ref_end:this.ref_deg(deg_end),color:color}
   },
-
   /* Draw an arc in the center of canvas in degrees */
   arc: function (canvas, deg_start, deg_end, radius, clockwise) {
     center = cartesian.coords(canvas, 0, 0)
     ctx.arc(center.x,center.y,radius,this.deg(deg_start),this.deg(deg_end),clockwise);
   },
-
   /* Transform degrees to radians */
   deg: function (deg) {
     return (Math.PI*2*(360-(deg%360)/360))
   },
-  
   /* Get the reference angle from a given deg */
   ref_deg: function (deg) {
     _d = Math.abs(deg)%360
@@ -186,12 +178,15 @@ var dyge = {
 
 
 var canvas = document.getElementById("canvas_plane")
-_screen_width = ($(window).height()<=$(window).width()?$(window).height():$(window).width())*0.95
-$(canvas).attr('width', _screen_width)
-$(canvas).attr('height', _screen_width)
+// Set up canvas
+_screen_min_width = ($(window).height()<$(window).width()?$(window).height():$(window).width())*0.95
+$(canvas).attr('width', _screen_min_width); $(canvas).attr('height', _screen_min_width)
 cartesian.make(canvas)
 
+// Draw
 dyge.make(canvas, 0, -90, 50)
+
+
 
 $('#form').on('submit', function(){
   post = {
