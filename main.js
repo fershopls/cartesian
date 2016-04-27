@@ -17,6 +17,7 @@ var cartesian = {
     ctx = canvas.getContext("2d")
     // Draw grid
     ctx.beginPath()
+    ctx.lineWidth = 1
     ctx.strokeStyle = '#f1f1f1'
     for (i = options.total_lines; i > 0; i--) {
       ctx.moveTo(i*canvas.width/options.total_lines, 0)
@@ -75,6 +76,7 @@ var cartesian = {
     // Get context
     ctx = canvas.getContext("2d")
     
+    ctx.save()
     ctx.beginPath()
     ctx.setLineDash([8,5])
     ctx.strokeStyle = 'lightcoral'
@@ -87,6 +89,7 @@ var cartesian = {
       ctx.lineTo(canvas.width/2, canvas.width/2)
     ctx.stroke()
     ctx.closePath()
+    ctx.restore()
   },
 
   /* Prints a string on given coords*/
@@ -144,11 +147,51 @@ var pyte = {
   }
 }
 
+var dyge = {
+  colors: ["magenta","brown","blue","green","yellow","purple"],
+  /* Draw an arc from degrees */
+  make: function (canvas, deg_start, deg_end, radius) {
+    color = this.colors[Math.floor(Math.random()*this.colors.length)]
+    
+    ctx.beginPath();
+    ctx.lineWidth = 5
+    ctx.strokeStyle = color
+    clockwise = deg_end>=0?true:false;
+    this.arc(canvas, deg_start, deg_end, radius, clockwise);
+    ctx.stroke();
+    ctx.closePath();
+
+    return {deg_start:deg_start,deg_end:deg_end,ref_end:this.ref_deg(deg_end),color:color}
+  },
+
+  /* Draw an arc in the center of canvas in degrees */
+  arc: function (canvas, deg_start, deg_end, radius, clockwise) {
+    center = cartesian.coords(canvas, 0, 0)
+    ctx.arc(center.x,center.y,radius,this.deg(deg_start),this.deg(deg_end),clockwise);
+  },
+
+  /* Transform degrees to radians */
+  deg: function (deg) {
+    return (Math.PI*2*(360-(deg%360)/360))
+  },
+  
+  /* Get the reference angle from a given deg */
+  ref_deg: function (deg) {
+    _d = Math.abs(deg)%360
+    _d = Math.abs(deg>270?360-_d:180-_d)
+    _d = Math.abs(deg<0&&deg>-90?deg:_d)
+    return _d
+  }
+}
+
+
 var canvas = document.getElementById("canvas_plane")
 _screen_width = ($(window).height()<=$(window).width()?$(window).height():$(window).width())*0.95
 $(canvas).attr('width', _screen_width)
 $(canvas).attr('height', _screen_width)
 cartesian.make(canvas)
+
+dyge.make(canvas, 0, -90, 50)
 
 $('#form').on('submit', function(){
   post = {
