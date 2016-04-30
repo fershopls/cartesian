@@ -4,13 +4,7 @@ var parameters_manager = {
     
   setup: function (options) {
     options = this.getDefaultOptions(options)
-    // Handle submits and callbacks
-    handleCallback = this.handleCallback
-    self = this
-    $.each(options.submits, function(selector, callback){
-      $(selector).on('click', {self:self, callback_string:callback}, handleCallback)
-    })
-    
+    // Register Events
     this.registerEvents(options.events)
     // Save options
     this.options = options
@@ -25,10 +19,7 @@ var parameters_manager = {
       matches = (/^([\w-_]+)\s(.+)$/i).exec(event)
       _event = matches[1]
       _selector = matches[2]
-      _callback = callback
-      $(_selector).on(_event, function (e) {
-        self.runCallback(_callback, e)
-      })
+      $(_selector).on(_event, {self:self, callback_string:callback}, self.handleCallback)
     })
   },
   
@@ -43,7 +34,7 @@ var parameters_manager = {
   },
   
   handleCallback: function (e) {
-    e.data.self.runCallback(e.data.callback_string, [])
+    e.data.self.runCallback(e.data.callback_string, e)
   },
   
   getFieldValues: function () {
@@ -61,7 +52,6 @@ var parameters_manager = {
       form: '',
       field_names: [],
       events: {},
-      submits: {},
       callbacks: {},
     }
     return $.extend(default_options,options)
@@ -240,7 +230,7 @@ var dyge = {
   },
   /* Transform degrees to radians */
   deg: function (deg) {
-    return (Math.PI*2*(360-(deg%360)/360))
+    return (deg==360?Math.PI*2:Math.PI*2*(360-(deg%360)/360))
   },
   /* Get the reference angle from a given deg */
   ref_deg: function (deg) {
@@ -248,7 +238,7 @@ var dyge = {
     _d = Math.abs(deg)
     _d = Math.abs(deg>270||deg<-270?360-_d:180-_d)
     _d = Math.abs(deg<0&&deg>-90||deg>0&&deg<90?deg:_d)
-    return _d
+    return _d==180?0:_d
   }
 }
 
@@ -270,10 +260,9 @@ parameters_manager.setup({
   field_names: ['action','values'],
   events: {
     'change *[name=action]': 'renderForm',
-  },
-  submits: {
-    '#draw':'doDraw',
-    '#clear':'doClear',
+    'keydown *[name=values]': 'submit',
+    'click #draw': 'doDraw',
+    'click #clear': 'doClear',
   },
   callbacks: {
     initialize: function() {
@@ -281,8 +270,10 @@ parameters_manager.setup({
     },
     
     doDraw: function () {
-      _user_input = this.fields.values
-      parameters = _user_input.replace(/\s/gi, '').split(',')
+      if (!this.fields.values) return false;
+      
+      parameters = this.fields.values.replace(/\s/gi, '').split(',')
+
       if (this.fields.action == 'trig')
         this.callbacks.trig(this, parameters)
       else if (this.fields.action == 'degs')
@@ -300,6 +291,14 @@ parameters_manager.setup({
         $(this.fields_obj.values).attr('placeholder', 'sen(15/24), cos(13/15), tan(10/20), 42/32...')
       else if (this.fields.action == 'degs')
         $(this.fields_obj.values).attr('placeholder', '90, 230, 1020...')
+    },
+    
+    submit: function (e) {
+      if (e.which == 13)
+      {
+        this.callbacks.doDraw.call(this)
+        this.fields_obj.values.val('')
+      }
     },
     
     trig: function(su, parameters) {
@@ -357,7 +356,7 @@ parameters_manager.setup({
         _info = JSON.stringify(_info).replace(/\"/gi,'').replace(/\,/gi, ', ')
         $('.status').html('['+status_i+'] '+_info+"<br/>"+$('.status').html())
 
-        if (plus_minus != null) {
+        if (typeof plus_minus !== 'undefined') {
           triangle_obj = pyte.create(triangle_obj.a_side, triangle_obj.o_side, triangle_obj.hypotenuse)
 
           triangle_obj.a_side = plus_minus=='a'?triangle_obj.a_side*-1:triangle_obj.a_side
@@ -379,8 +378,8 @@ parameters_manager.setup({
         angle_info = JSON.stringify({
           angle: deg,
           residue_angle: deg%360,
-          turns: Math.floor(Math.abs(deg/360)),
           reference_angle: angle.ref_end,
+          turns: Math.floor(Math.abs(deg/360)),
         }).replace(/\"/g,"")
         angle_info = angle_info.replace(/\,/g,", ")
 
