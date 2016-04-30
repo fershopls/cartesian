@@ -1,25 +1,29 @@
-.text-center
+html,body
+  color #333
+.u-text-center
   text-align center
-  margin-top 10px
-  form
-    margin 0
-  canvas
-    border 1px solid #e7e7e7
 .status
-  background-color #fafafa
-  padding 20px
-.info
-  transition all 0.4s ease
-  background-color lightyellow
-  overflow-x scroll
-  margin 0
-  display none
+  background-color rgb(255,255,200)
+  font-family monospace, monospace
+  font-size 1em
+  margin 25px 0
+  transition 0.4s ease
+  height 0
+  color transparent
+  overflow scroll
+  padding 0 20px
   &.show
-    display block
-  pre
-    padding 20px
-    text-align left
-    width 400px
-    margin 0 auto
-.canvas
-  margin-bottom 10px
+    padding 25px
+    color #333
+    height 100px
+.parameters
+  margin 10px 0 0
+  input,button,select,textarea
+    width 100%
+  button
+    position relative
+    .fa
+      position absolute
+      left 15px
+      top 0px
+      line-height 38px

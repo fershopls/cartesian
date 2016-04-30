@@ -1,3 +1,76 @@
+var parameters_manager = {
+  options: {},
+  super_object: {},
+    
+  setup: function (options) {
+    options = this.getDefaultOptions(options)
+    // Handle submits and callbacks
+    handleCallback = this.handleCallback
+    self = this
+    $.each(options.submits, function(selector, callback){
+      $(selector).on('click', {self:self, callback_string:callback}, handleCallback)
+    })
+    
+    this.registerEvents(options.events)
+    // Save options
+    this.options = options
+    // Run initialize
+    if (typeof options.callbacks.initialize!=='undefined')
+      this.runCallback('initialize')
+  },
+  
+  registerEvents: function (events) {
+    self = this
+    $.each(events, function(event, callback) {
+      matches = (/^([\w-_]+)\s(.+)$/i).exec(event)
+      _event = matches[1]
+      _selector = matches[2]
+      _callback = callback
+      $(_selector).on(_event, function (e) {
+        self.runCallback(_callback, e)
+      })
+    })
+  },
+  
+  getCallback: function (callback_string) {
+    return this.options.callbacks[callback_string]
+  },
+  
+  runCallback: function (callback, parameters) {
+    options = $.extend(this.options, this.getFieldValues())
+    callback = (typeof callback==='function')?callback:this.getCallback(callback)
+    callback.call(options, parameters)
+  },
+  
+  handleCallback: function (e) {
+    e.data.self.runCallback(e.data.callback_string, [])
+  },
+  
+  getFieldValues: function () {
+    fields_obj = {}
+    fields_val = {}
+    for (i = 0; i < this.options.field_names.length; i++) {
+      fields_obj[this.options.field_names[i]] = $(this.options.form).find('*[name='+this.options.field_names[i]+']')
+      fields_val[this.options.field_names[i]] = fields_obj[this.options.field_names[i]].val()
+    }
+    return {fields:fields_val,fields_obj:fields_obj}
+  },
+    
+  getDefaultOptions: function (options) {
+    default_options = {
+      form: '',
+      field_names: [],
+      events: {},
+      submits: {},
+      callbacks: {},
+    }
+    return $.extend(default_options,options)
+  },
+}
+
+
+
+
 var cartesian = {
   // Last time used
   last_coords: [0,0],
@@ -180,71 +253,140 @@ var dyge = {
 }
 
 
+
+
+
+/* SET UP CANVAS */
 var canvas = document.getElementById("canvas_plane")
-// Set up canvas
 _screen_min_width = ($(window).height()<$(window).width()?$(window).height():$(window).width())*0.95
 $(canvas).attr('width', _screen_min_width); $(canvas).attr('height', _screen_min_width)
 cartesian.make(canvas)
 
 
 
-
-
-
-
-
-$('#form').on('submit', function(){
-  post = {
-    fun: $('#fun').val(),
-    num: $('#num').val(),
-    den: $('#den').val(),
-  }
-
-  a_side = null
-  o_side = null
-  hypotenuse = null
-  plus_minus = null
-
-  if (post.fun == 'point') {
-    // AO ! H
-    a_side = post.num
-    o_side = post.den
-  } else if (post.fun == 'sen') {
-    // OH ! A
-    o_side = post.num
-    hypotenuse = post.den
-    plus_minus = 'a'
-  } else if (post.fun == 'cos') {
-    // AH ! O
-    a_side = post.num
-    hypotenuse = post.den
-    plus_minus = 'o'
-  } else if (post.fun == 'tan') {
-    // OA ! H
-    o_side = post.num
-    a_side = post.den
-  }
-
-  cartesian.clear(canvas)
-  cartesian.make(canvas)
-  
-  triangle_obj = pyte.create(a_side, o_side, hypotenuse)
-  pyte.make(canvas, triangle_obj)
-
-  $('.a_side').html(triangle_obj.a_side)
-  $('.o_side').html(triangle_obj.o_side)
-  _hypotenuse = (triangle_obj.hypotenuse % 1 != 0)?'sqrt('+Math.pow(triangle_obj.hypotenuse,2)+') = '+triangle_obj.hypotenuse:triangle_obj.hypotenuse
-  $('.hypotenuse').html(_hypotenuse)
-  $('.info').addClass('show')
-
-  if (plus_minus != null) {
-    triangle_obj = pyte.create(a_side, o_side, hypotenuse)
+/* FORM */
+parameters_manager.setup({
+  form: '#parameters',
+  field_names: ['action','values'],
+  events: {
+    'change *[name=action]': 'renderForm',
+  },
+  submits: {
+    '#draw':'doDraw',
+    '#clear':'doClear',
+  },
+  callbacks: {
+    initialize: function() {
+      this.callbacks.renderForm.call(this)
+    },
     
-    triangle_obj.a_side = plus_minus=='a'?triangle_obj.a_side*-1:triangle_obj.a_side
-    triangle_obj.o_side = plus_minus=='o'?triangle_obj.o_side*-1:triangle_obj.o_side
+    doDraw: function () {
+      _user_input = this.fields.values
+      parameters = _user_input.replace(/\s/gi, '').split(',')
+      if (this.fields.action == 'trig')
+        this.callbacks.trig(this, parameters)
+      else if (this.fields.action == 'degs')
+        this.callbacks.degs(this, parameters)
+    },
+    doClear: function () {
+      cartesian.clear(canvas)
+      cartesian.make(canvas)
+      $('.status').removeClass('show').html('')
+      status_i = 0
+    },
     
-    pyte.make(canvas, triangle_obj)
-  }
-  
-  return false;
-});
+    renderForm: function (e) {
+      if (this.fields.action == 'trig')
+        $(this.fields_obj.values).attr('placeholder', 'sen(15/24), cos(13/15), tan(10/20), 42/32...')
+      else if (this.fields.action == 'degs')
+        $(this.fields_obj.values).attr('placeholder', '90, 230, 1020...')
+    },
+    
+    trig: function(su, parameters) {
+      status_i = (typeof status_i!=='undefined')?status_i:0
+      for (i = 0; i < parameters.length; i++) {
+        status_i++
+        matches = (/^([a-z]{3})?\(?([0-9\-\+]+)\/([0-9\-\+]+)\)?$/i).exec(parameters[i])
+        post = {fun: (matches[1]?matches[1].toLowerCase():'point'), num: matches[2], den: matches[3]}
+        
+        triangle_obj = {
+          a_side: null,
+          o_side: null,
+          hypotenuse: null
+        }
+
+        if (post.fun == 'point' || post.fun == 'cot') {
+          // AO ! H
+          triangle_obj.a_side = post.num
+          triangle_obj.o_side = post.den
+        } else if (post.fun == 'sen') {
+          // OH ! A
+          triangle_obj.o_side = post.num
+          triangle_obj.hypotenuse = post.den
+          plus_minus = 'a'
+        } else if (post.fun == 'cos') {
+          // AH ! O
+          triangle_obj.a_side = post.num
+          triangle_obj.hypotenuse = post.den
+          plus_minus = 'o'
+        } else if (post.fun == 'tan') {
+          // OA ! H
+          triangle_obj.o_side = post.num
+          triangle_obj.a_side = post.den
+        } else if (post.fun == 'sec') {
+          // AH ! O
+          triangle_obj.a_side = post.den
+          triangle_obj.hypotenuse = post.num
+          plus_minus = 'o'
+        } else if (post.fun == 'csc') {
+          // OH ! A
+          triangle_obj.o_side = post.den
+          triangle_obj.hypotenuse = post.num
+          plus_minus = 'a'
+        }
+        
+        pyte.make(canvas, pyte.create(triangle_obj.a_side, triangle_obj.o_side, triangle_obj.hypotenuse))
+
+        _info = {
+          a_side: triangle_obj.a_side,
+          o_side: triangle_obj.o_side,
+          hypotenuse:(triangle_obj.hypotenuse % 1 != 0)?'sqrt('+Math.floor(Math.pow(triangle_obj.hypotenuse,2))+') = '+triangle_obj.hypotenuse:triangle_obj.hypotenuse,
+        }
+        
+        $('.status').addClass('show')
+        _info = JSON.stringify(_info).replace(/\"/gi,'').replace(/\,/gi, ', ')
+        $('.status').html('['+status_i+'] '+_info+"<br/>"+$('.status').html())
+
+        if (plus_minus != null) {
+          triangle_obj = pyte.create(triangle_obj.a_side, triangle_obj.o_side, triangle_obj.hypotenuse)
+
+          triangle_obj.a_side = plus_minus=='a'?triangle_obj.a_side*-1:triangle_obj.a_side
+          triangle_obj.o_side = plus_minus=='o'?triangle_obj.o_side*-1:triangle_obj.o_side
+
+          pyte.make(canvas, triangle_obj)
+        }
+        
+      }
+    },
+    degs: function(su, parameters) {
+      status_i = (typeof status_i!=='undefined')?status_i:0
+      for (i = 0; i < parameters.length; i++) {
+        status_i++
+        deg = parameters[i]
+        if (isNaN(deg)) continue;
+        angle = dyge.make(canvas, 0, deg, 30+(status_i*Math.floor(canvas.width/40+10)))
+
+        angle_info = JSON.stringify({
+          angle: deg,
+          residue_angle: deg%360,
+          turns: Math.floor(Math.abs(deg/360)),
+          reference_angle: angle.ref_end,
+        }).replace(/\"/g,"")
+        angle_info = angle_info.replace(/\,/g,", ")
+
+        $('.status').html('['+status_i+'] '+angle.color+" "+angle_info+"<br/>"+$('.status').html())
+        $('.status').addClass('show')
+      }
+    },
+  },
+})

@@ -1,59 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Cartesian</title>
-    <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="bower_components/skeleton/css/normalize.css">
-    <link rel="stylesheet" href="bower_components/skeleton/css/skeleton.css">
-    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Cartesian</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="bower_components/skeleton/css/normalize.css">
+  <link rel="stylesheet" href="bower_components/skeleton/css/skeleton.css">
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
-  <div class="text-center">
-    <p>View source on <a href="https://github.com/fershopls/cartesian">github</a>.</p>
-  </div>
-    
-  <div class="container text-center">
-  <form id="form" novalidate>
-    <div class="row">
-      <div class="three columns">
-        <select id=fun class="u-full-width">
-          <option value="point">Point</option>
-          <option value="sen">Sen</option>
-          <option value="cos">Cos</option>
-          <option value="tan">Tan</option>
-        </select>
-      </div>
-      <div class="five columns">
-        <input id=num type="number" class="u-full-width">
-      </div>
-      <div class="one column">
-        <input type="text" value="/" disabled class="u-full-width" style="text-align:center"/>
-      </div>
-      <div class="three columns">
-        <input id=den type="number" class="u-full-width">
-      </div>
-      <div class="twelve columns">
-        <input type="submit" value="draw" class="u-full-width">
-      </div>
-    </div>
-  <br>
-  </form>
+  <div class="u-text-center">
+    <br /><p>View source on <a href="https://github.com/fershopls/cartesian">github</a>.</p>
   </div>
 
-    <div class="info text-center">
-      <pre>
-        a_side: <span class="a_side"></span>
-        o_side: <span class="o_side"></span>
-        hypotenuse: <span class="hypotenuse"></span>
-      </pre>
+  <div class="container">
+    <div class="parameters" id="parameters">
+      <div class="row">
+        <div class="twelve columns">
+          <label for="action">Select an action:</label>
+          <select name="action">
+            <option value="trig">Trygonometry</option>
+            <option value="degs">Degrees</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="twelve columns">
+          <label for="values">Insert the values (comma separated):</label>
+          <input type="text" name="values" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="one-half column">
+          <button id='clear' type='button' onclick='return false'><i class="fa fa-trash"></i>Clear</button>
+        </div>
+        <div class="one-half column">
+          <button id='draw' type='button' onclick='return false' class="button-primary"><i class="fa fa-pencil"></i>Draw</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="canvas text-center">
-      <canvas id="canvas_plane" width="350" height="350">
-    </div>
-    
-    <script src="main.js"></script>
-    
+  <div class="status"></div>
+
+  <div class="u-text-center">
+    <canvas id="canvas_plane" style='border:1px solid #fafafa' width="350" height="350">
+  </div>
+
+  <script src="main.js"></script>  
 </body>
 </html>
