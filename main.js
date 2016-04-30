@@ -164,7 +164,7 @@ var cartesian = {
   }
 }
 
-var pyte = {
+var pyte = { 
   make: function (canvas, triangle_obj) {
     x = triangle_obj.a_side
     y = triangle_obj.o_side
@@ -300,6 +300,11 @@ parameters_manager.setup({
         this.fields_obj.values.val('')
       }
     },
+
+    dd: function (json_string) {
+      $('.status').addClass('show')
+      $('.status').html('['+status_i+'] '+json_string+"<br/>"+$('.status').html())
+    },
     
     trig: function(su, parameters) {
       status_i = (typeof status_i!=='undefined')?status_i:0
@@ -346,15 +351,13 @@ parameters_manager.setup({
         
         pyte.make(canvas, pyte.create(triangle_obj.a_side, triangle_obj.o_side, triangle_obj.hypotenuse))
 
-        _info = {
+        _info = JSON.stringify({
           a_side: triangle_obj.a_side,
           o_side: triangle_obj.o_side,
           hypotenuse:(triangle_obj.hypotenuse % 1 != 0)?'sqrt('+Math.floor(Math.pow(triangle_obj.hypotenuse,2))+') = '+triangle_obj.hypotenuse:triangle_obj.hypotenuse,
-        }
+        }).replace(/\"/gi,'').replace(/\,/gi, ', ')
         
-        $('.status').addClass('show')
-        _info = JSON.stringify(_info).replace(/\"/gi,'').replace(/\,/gi, ', ')
-        $('.status').html('['+status_i+'] '+_info+"<br/>"+$('.status').html())
+        this.dd(_info)
 
         if (typeof plus_minus !== 'undefined') {
           triangle_obj = pyte.create(triangle_obj.a_side, triangle_obj.o_side, triangle_obj.hypotenuse)
@@ -380,11 +383,9 @@ parameters_manager.setup({
           residue_angle: deg%360,
           reference_angle: angle.ref_end,
           turns: Math.floor(Math.abs(deg/360)),
-        }).replace(/\"/g,"")
-        angle_info = angle_info.replace(/\,/g,", ")
+        }).replace(/\"/g,"").replace(/\,/g,", ")
 
-        $('.status').html('['+status_i+'] '+angle.color+" "+angle_info+"<br/>"+$('.status').html())
-        $('.status').addClass('show')
+        this.dd(angle_info)
       }
     },
   },
